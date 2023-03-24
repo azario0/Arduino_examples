@@ -1,0 +1,362 @@
+// Pin definitions
+const int buttonPins[5] = {2, 3, 4, 5, 6}; // Pins for buttons on floors 1-5
+const int motorPin = 9; // Pin for motor control
+const int floorSensorPins[6] = {A0, A1, A2, A3, A4, A5}; // Pins for floor sensors 0-5
+
+// Other variables
+int currentFloor = 0; // Current floor (0 means elevator is in between floors)
+int destinationFloor = 0; // Floor that elevator is moving to (0 means elevator is not moving)
+bool movingUp = true; // Direction of elevator movement
+bool moving = false; // Whether elevator is moving or not
+bool doorOpen = false; // Whether elevator door is open or closed
+
+void setup() {
+  // Set up pins
+  for (int i = 0; i < 5; i++) {
+    pinMode(buttonPins[i], INPUT_PULLUP);
+  }
+  pinMode(motorPin, OUTPUT);
+  for (int i = 0; i < 6; i++) {
+    pinMode(floorSensorPins[i], INPUT);
+  }
+
+  // Set initial floor position
+  for (int i = 0; i < 6; i++) {
+    if (digitalRead(floorSensorPins[i]) == HIGH) {
+      currentFloor = i;
+    }
+  }
+}
+
+void loop() {
+  // Check for button presses
+  for (int i = 0; i < 5; i++) {
+    if (digitalRead(buttonPins[i]) == LOW) {
+      destinationFloor = i + 1;
+    }
+  }
+
+  // Check for arrival at destination
+  if (currentFloor == destinationFloor && moving) {
+    stopElevator();
+  }
+
+  // Check for arrival at floor
+  for (int i = 0; i < 6; i++) {
+    if (digitalRead(floorSensorPins[i]) == HIGH) {
+      currentFloor = i;
+      if (destinationFloor == i && moving) {
+        stopElevator();
+      }
+    }
+  }
+
+  // Move elevator
+  if (destinationFloor != currentFloor && !doorOpen) {
+    moving = true;
+    digitalWrite(motorPin, movingUp ? HIGH : LOW);
+    delay(5000); // Change this value to adjust the speed of the elevator
+    movingUp = (destinationFloor > currentFloor);
+  }
+
+  // Open or close door
+  if (!moving && !doorOpen) {
+    doorOpen = true;
+    delay(2000); // Change this value to adjust the time that the door remains open
+  } else if (!moving && doorOpen) {
+    doorOpen = false;
+    delay(1000); // Change this value to adjust the time that the door remains closed
+  }
+}
+
+void stopElevator() {
+  digitalWrite(motorPin, LOW);
+  moving = false;
+  destinationFloor = 0;
+}
+
+
+
+
+
+
+
+
+
+
+############################################################################################################################################
+
+//This is the code for 2 floors the above one is for 5 floors
+// Pin definitions
+const int button1Pin = 2; // Pin for button on floor 1
+const int button2Pin = 3; // Pin for button on floor 2
+const int motorPin = 9; // Pin for motor control
+const int floor1SensorPin = A0; // Pin for floor 1 sensor
+const int floor2SensorPin = A1; // Pin for floor 2 sensor
+
+// Other variables
+int floor = 0; // Current floor (0 means elevator is in between floors)
+int destination = 0; // Floor that elevator is moving to (0 means elevator is not moving)
+bool movingUp = true; // Direction of elevator movement
+bool moving = false; // Whether elevator is moving or not
+bool doorOpen = false; // Whether elevator door is open or closed
+
+void setup() {
+  // Set up pins
+  ms.setSpeed(10);
+  // Set initial floor position
+  if (digitalRead(floor1SensorPin) == HIGH) {
+    floor = 1;
+  } else if (digitalRead(floor2SensorPin) == HIGH) {
+    floor = 2;
+  }
+}
+
+void loop() {
+  // Check for button presses
+  if (digitalRead(button1Pin) == LOW) {
+    destination = 1;
+  } else if (digitalRead(button2Pin) == LOW) {
+    destination = 2;
+  }
+
+  // Check for arrival at destination
+  if (floor == destination && moving) {
+    stopElevator();
+  }
+
+  // Check for arrival at floor
+  if (digitalRead(floor1SensorPin) == HIGH) {
+    floor = 1;
+    if (destination == 1 && moving) {
+      stopElevator();
+    }
+  } else if (digitalRead(floor2SensorPin) == HIGH) {
+    floor = 2;
+    if (destination == 2 && moving) {
+      stopElevator();
+    }
+  }
+
+  // Move elevator
+  if (destination != floor && !doorOpen) {
+  	if (movingUp){
+  	ms.step(400);
+  	delay(1000);
+  	}
+  	else {
+  	ms.step(-400);
+  	delay(1000);
+  	}
+
+    movingUp = !movingUp;
+  }
+
+  // Open or close door
+  if (!moving && !doorOpen) {
+    doorOpen = true;
+    delay(2000); // Change this value to adjust the time that the door remains open
+  } else if (!moving && doorOpen) {
+    doorOpen = false;
+    delay(1000); // Change this value to adjust the time that the door remains closed
+  }
+}
+
+void stopElevator() {
+  ms.step(0);
+  moving = false;
+  destination = 0;
+}
+
+
+##############################################################################################################################
+//Display with digits 
+// Pin definitions
+const int buttonPin1 = 2; // Pin for button on floor 1
+const int buttonPin2 = 3; // Pin for button on floor 2
+const int motorPin = 9; // Pin for motor control
+const int floorSensorPin = A0; // Pin for floor sensor
+const int segmentPins[] = {4, 5, 6, 7, 8, 10, 11, 12}; // Pins for 7-segment LED display segments
+const int digitPins[] = {13, A1, A2, A3}; // Pins for 7-segment LED display digits
+const int floorDigits[] = {B00000011, B10011111}; // Binary representations of digits 0-9 for each floor
+
+// Other variables
+int currentFloor = 0; // Current floor (0 means elevator is in between floors)
+int destinationFloor = 0; // Floor that elevator is moving to (0 means elevator is not moving)
+bool movingUp = true; // Direction of elevator movement
+bool moving = false; // Whether elevator is moving or not
+bool doorOpen = false; // Whether elevator door is open or closed
+
+void setup() {
+  // Set up pins
+  pinMode(buttonPin1, INPUT_PULLUP);
+  pinMode(buttonPin2, INPUT_PULLUP);
+  pinMode(motorPin, OUTPUT);
+  pinMode(floorSensorPin, INPUT);
+  for (int i = 0; i < 8; i++) {
+    pinMode(segmentPins[i], OUTPUT);
+  }
+  for (int i = 0; i < 4; i++) {
+    pinMode(digitPins[i], OUTPUT);
+  }
+
+  // Set initial floor position
+  if (digitalRead(floorSensorPin) == HIGH) {
+    currentFloor = 2;
+  }
+}
+
+void loop() {
+  // Check for button presses
+  if (digitalRead(buttonPin1) == LOW) {
+    destinationFloor = 1;
+  } else if (digitalRead(buttonPin2) == LOW) {
+    destinationFloor = 2;
+  }
+
+  // Check for arrival at destination
+  if (currentFloor == destinationFloor && moving) {
+    stopElevator();
+  }
+
+  // Check for arrival at floor
+  if (digitalRead(floorSensorPin) == HIGH) {
+    if (currentFloor == 0) {
+      currentFloor = 1;
+    } else if (currentFloor == 2) {
+      currentFloor = 2;
+    }
+    if (destinationFloor == currentFloor && moving) {
+      stopElevator();
+    }
+  }
+
+  // Move elevator
+  if (destinationFloor != currentFloor && !doorOpen) {
+    moving = true;
+    digitalWrite(motorPin, movingUp ? HIGH : LOW);
+    delay(5000); // Change this value to adjust the speed of the elevator
+    movingUp = (destinationFloor > currentFloor);
+  }
+
+  // Open or close door
+  if (!moving && !doorOpen) {
+    doorOpen = true;
+    delay(2000); // Change this value to adjust the time that the door remains open
+  } else if (!moving && doorOpen) {
+    doorOpen = false;
+    delay(1000); // Change this value to adjust the time that the door remains closed
+  }
+
+  // Display current floor
+  if (currentFloor == 1) {
+    displayFloor(floorDigits[0]);
+
+} else if (currentFloor == 2) {
+displayFloor(floorDigits[1]);
+} else {
+clearDisplay();
+}
+}
+
+void stopElevator() {
+moving = false;
+digitalWrite(motorPin, LOW);
+delay(1000); // Change this value to adjust the time that the elevator stops at a floor
+}
+
+void displayFloor(byte floorDigit) {
+clearDisplay();
+for (int i = 0; i < 8; i++) {
+digitalWrite(segmentPins[i], (floorDigit >> i) & 1);
+}
+digitalWrite(digitPins[0], HIGH); // Turn on first digit
+digitalWrite(digitPins[1], LOW); // Turn off second digit
+digitalWrite(digitPins[2], LOW); // Turn off third digit
+digitalWrite(digitPins[3], LOW); // Turn off fourth digit
+}
+
+void clearDisplay() {
+for (int i = 0; i < 4; i++) {
+digitalWrite(digitPins[i], LOW);
+}
+for (int i = 0; i < 8; i++) {
+digitalWrite(segmentPins[i], LOW);
+}
+}
+
+
+##################################################################################################################################################"
+#include <Stepper.h>
+double spr = 2048;
+Stepper ms(spr,8,10,9,11);
+const int buttonPin1 = 1; 
+const int buttonPin2 = 2; 
+const int buttonPin3 = 3; 
+int position = 1;
+setup(){
+ms.setSpeed(10);
+}
+loop(){
+if (digitalRead(buttonPin1) == HIGH){
+if (position == 1){
+position = 1;
+}
+else if (position == 2){
+ms.step(-400);
+delay(1000);
+position = 1;
+}
+
+else if (position == 3){
+ms.step(-800);
+delay(1000);
+position = 1;
+}
+
+}
+
+
+
+else if (digitalRead(buttonPin2) == HIGH){
+if (position == 1){
+ms.step(400);
+delay(1000);
+position = 2;
+}
+else if (position == 2){
+position = 2;
+}
+
+else if (position == 3){
+ms.step(-400);
+delay(1000);
+position = 2;
+}
+
+}
+
+
+
+else if (digitalRead(buttonPin3) == HIGH){
+if (position == 1){
+ms.step(800);
+delay(1000);
+position = 3;
+}
+else if (position == 2){
+ms.step(400);
+delay(1000);
+position = 3;
+}
+
+else if (position == 3){
+
+position = 3;
+}
+
+}
+
+
+
+}

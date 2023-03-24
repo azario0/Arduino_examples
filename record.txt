@@ -1,0 +1,2 @@
+1 => inférieur a 10
+2 => inferieur a 250

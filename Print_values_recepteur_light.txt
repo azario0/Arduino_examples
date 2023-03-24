@@ -1,0 +1,19 @@
+// Define the pin for the photoresistor
+const int PHOTO_PIN = A0;
+
+void setup() {
+  // Start the serial communication
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Read the analog value of the photoresistor
+  int photoValue = analogRead(PHOTO_PIN);
+
+  // Print the value to the serial monitor
+  Serial.print("Photoresistor value: ");
+  Serial.println(photoValue);
+
+  // Wait a short time before taking another reading
+  delay(100);
+}
